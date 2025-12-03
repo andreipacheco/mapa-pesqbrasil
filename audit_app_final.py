@@ -64,7 +64,7 @@ def gerar_dados_simulados():
         cpf = f"{np.random.randint(100, 999)}***{np.random.randint(10, 99)}"
         nome_letras = ['A', 'E', 'I', 'O', 'U', 'M', 'N', 'P', 'R', 'S', 'T', 'C', 'F', 'G', 'H', 'J', 'K', 'L', 'D', 'B', 'V', 'X', 'Z', 'W', 'Y', 'Q']
         nome = ''.join(np.random.choice(nome_letras, np.random.randint(5, 15)))
-        rgp = f"{np.random.choice(['APPA', 'AMPA', 'PAPA', 'MAPA', 'CEPA', 'SEPA', 'SPPA', 'RSPA'])}000000{np.random.randint(10000, 99999)}"
+        rgp = f"MAPA000{np.random.randint(10000000, 99999999)}"  # MAPA000 + 8 dígitos = 14 caracteres total
 
         # Criar perfis com diferentes probabilidades de risco
         rand = np.random.random()
@@ -137,9 +137,16 @@ def mascarar_texto(texto):
 
     texto_str = str(texto)
 
-    # Se já estiver mascarado (tem asteriscos), manter como está
-    if '*' in texto_str:
+    # Se já estiver mascarado (tem asteriscos ou XXXX), manter como está
+    if '*' in texto_str or 'XXXX' in texto_str:
         return texto_str
+
+    # Mascarar RGP: formato MAPA00000000000 -> MAPA000XXXX0000
+    if texto_str.startswith('MAPA') and len(texto_str) >= 14:
+        prefixo = texto_str[:8]  # MAPA000
+        meio = 'XXXX'
+        finais = texto_str[-4:]  # últimos 4 dígitos
+        return f"{prefixo}{meio}{finais}"
 
     # Mascarar CPF: manter primeiros 3 e últimos 2 digitos
     if len(texto_str) == 11 and texto_str.isdigit():
@@ -178,6 +185,8 @@ df = carregar_dados()
 if df is not None:
     df['nome_mascarado'] = df['nome_pescador'].apply(mascarar_texto)
     df['cpf_mascarado'] = df['cpf'].apply(mascarar_texto)
+    if 'rgp' in df.columns:
+        df['rgp_mascarado'] = df['rgp'].apply(mascarar_texto)
 
 # Sidebar
 st.sidebar.title("🔍 Audit-IA")
@@ -340,13 +349,20 @@ elif pagina == "🔍 Resultados da Auditoria":
 
         if len(df_filtrado) > 0:
             # Preparar dados para exibição
-            df_exibir = df_filtrado[[
-                'nome_mascarado', 'cpf_mascarado', 'risco_score', 'risco_categoria',
-                'municipio', 'uf', 'justificativas'
-            ]].copy()
+            colunas_exibir = ['nome_mascarado', 'cpf_mascarado', 'risco_score', 'risco_categoria',
+                            'municipio', 'uf', 'justificativas']
+
+            # Adicionar RGP mascarado se existir
+            if 'rgp_mascarado' in df_filtrado.columns:
+                colunas_exibir.insert(2, 'rgp_mascarado')  # Inserir após CPF
+
+            df_exibir = df_filtrado[colunas_exibir].copy()
 
             # Renomear colunas
-            df_exibir.columns = ['Nome', 'CPF', 'Score', 'Categoria', 'Município', 'UF', 'Justificativas']
+            if 'rgp_mascarado' in df_exibir.columns:
+                df_exibir.columns = ['Nome', 'CPF', 'RGP', 'Score', 'Categoria', 'Município', 'UF', 'Justificativas']
+            else:
+                df_exibir.columns = ['Nome', 'CPF', 'Score', 'Categoria', 'Município', 'UF', 'Justificativas']
 
             st.dataframe(df_exibir, use_container_width=True)
 

@@ -1,0 +1,2 @@
+# Este arquivo mantém o diretório models no controle de versão
+# Os modelos treinados (.pkl, .joblib, etc.) são ignorados pelo .gitignore

@@ -1,0 +1,18 @@
+{
+  "nome_modelo": "audit-ia-v1.0",
+  "data_treinamento": "2025-12-03",
+  "versao": "1.0.0",
+  "parametros": {
+    "threshold_risco_alto": 60,
+    "threshold_risco_medio": 30,
+    "pesos": {
+      "idade_vs_tempo": 25,
+      "beneficios_vs_renda": 30,
+      "escolaridade_vs_renda": 20,
+      "tecnologia_vs_declaracoes": 15,
+      "filiacao_institucional": 10,
+      "produtos_protegidos": 5,
+      "endereco_vs_area_pesca": 10
+    }
+  }
+}

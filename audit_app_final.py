@@ -64,7 +64,10 @@ def gerar_dados_simulados():
         cpf = f"{np.random.randint(100, 999)}***{np.random.randint(10, 99)}"
         nome_letras = ['A', 'E', 'I', 'O', 'U', 'M', 'N', 'P', 'R', 'S', 'T', 'C', 'F', 'G', 'H', 'J', 'K', 'L', 'D', 'B', 'V', 'X', 'Z', 'W', 'Y', 'Q']
         nome = ''.join(np.random.choice(nome_letras, np.random.randint(5, 15)))
-        rgp = f"MAPA000{np.random.randint(10000000, 99999999)}"  # MAPA000 + 8 dígitos = 14 caracteres total
+        # Gerar RGP com diferentes prefixos para simular dados reais
+        prefixos_rgp = ['MAPA', 'APPA', 'AMPA', 'PAPA', 'CEPA', 'SEPA', 'SPPA', 'RSPA']
+        prefixo_escolhido = np.random.choice(prefixos_rgp)
+        rgp = f"{prefixo_escolhido}000{np.random.randint(10000000, 99999999)}"  # PREFIXO000 + 8 dígitos = 14 caracteres total
 
         # Criar perfis com diferentes probabilidades de risco
         rand = np.random.random()
@@ -141,9 +144,9 @@ def mascarar_texto(texto):
     if '*' in texto_str or 'XXXX' in texto_str:
         return texto_str
 
-    # Mascarar RGP: formato MAPA00000000000 -> MAPA000XXXX0000
-    if texto_str.startswith('MAPA') and len(texto_str) >= 14:
-        prefixo = texto_str[:8]  # MAPA000
+    # Mascarar RGP: formato MAPA000XXXX0000, APPA000XXXX0000, etc.
+    if any(texto_str.startswith(prefixo) for prefixo in ['MAPA', 'APPA', 'AMPA', 'PAPA', 'CEPA', 'SEPA', 'SPPA', 'RSPA']) and len(texto_str) >= 14:
+        prefixo = texto_str[:8]  # MAPA000, APPA000, etc.
         meio = 'XXXX'
         finais = texto_str[-4:]  # últimos 4 dígitos
         return f"{prefixo}{meio}{finais}"
@@ -400,7 +403,7 @@ elif pagina == "📋 Relatórios Detalhados":
                     st.markdown(f"""
                     <div class="{cor_classe}">
                         <h4>{i}. {caso['nome_mascarado']} (CPF: {caso['cpf_mascarado']})</h4>
-                        <p><strong>RGP:</strong> {caso['rgp']} | <strong>Score:</strong> {caso['risco_score']}/100 | <strong>Categoria:</strong> {caso['risco_categoria']}</p>
+                        <p><strong>RGP:</strong> {caso.get('rgp_mascarado', caso['rgp'])} | <strong>Score:</strong> {caso['risco_score']}/100 | <strong>Categoria:</strong> {caso['risco_categoria']}</p>
                         <p><strong>Local:</strong> {caso['municipio']}-{caso['uf']} | <strong>Situação:</strong> {caso.get('st_situacao_pescador', 'N/A')}</p>
                         <p><strong>Justificativas:</strong></p>
                         <ul>

@@ -48,7 +48,7 @@ mapa-pesqbrasil/
 
 ### 🌐 **Via Streamlit Cloud (Recomendado)**
 
-Acesse diretamente: **https://share.streamlit.io/user/andreipacheco/mapa-pesqbrasil**
+Acesse diretamente: **https://audit-ia-rgp.streamlit.app/**
 
 ### 💻 **Execução Local**
 

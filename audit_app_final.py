@@ -390,9 +390,9 @@ elif pagina == "📋 Relatórios Detalhados":
                         <ul>
                     """, unsafe_allow_html=True)
 
-                    justificativas = str(caso['justificativas'])
-                    if justificativas and justificativas != 'nan':
-                        for justificativa in justificativas.split(';'):
+                    justificativas_lista = caso['justificativas']
+                    if isinstance(justificativas_lista, list) and justificativas_lista:
+                        for justificativa in justificativas_lista:
                             if justificativa.strip():
                                 st.markdown(f"<li>{justificativa.strip()}</li>", unsafe_allow_html=True)
                     else:
@@ -443,9 +443,9 @@ elif pagina == "📋 Relatórios Detalhados":
         st.markdown("### 🚨 Principais Tipos de Alerta")
 
         todas_justificativas = []
-        for justificativas in df['justificativas']:
-            if pd.notna(justificativas) and justificativas != 'nan':
-                todas_justificativas.extend(justificativas.split(';'))
+        for justificativas_lista in df['justificativas']:
+            if isinstance(justificativas_lista, list) and justificativas_lista:
+                todas_justificativas.extend(justificativas_lista)
 
         if todas_justificativas:
             # Limpar e contar justificativas

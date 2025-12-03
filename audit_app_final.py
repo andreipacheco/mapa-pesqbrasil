@@ -1,5 +1,5 @@
 """
-🔍 Audit-IA - Versão Final (50 Resultados com Dados Mascarados)
+🔍 Audit-IA - Versão Final (Auto-geração de dados)
 Sistema de auditoria inteligente do RGP - dados 100% anonimizados
 """
 
@@ -7,6 +7,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import numpy as np
+import os
 
 # Configuração da página
 st.set_page_config(
@@ -47,6 +49,87 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def gerar_dados_simulados():
+    """Gera dados simulados para demonstração"""
+    np.random.seed(42)  # Para resultados consistentes
+
+    dados = []
+    estados = ['PA', 'MA', 'AP', 'AM', 'RR', 'CE', 'PI', 'AC', 'RO', 'TO', 'BA', 'PE', 'AL', 'SE', 'RN']
+    cidades = ['Belém', 'Santarém', 'Marabá', 'Ananindeua', 'Castanhal', 'São Luís', 'Imperatriz', 'São José de Ribamar', 'Macapá', 'Santana', 'Manaus', 'Parintins', 'Itacoatiara', 'Boa Vista', 'Rorainópolis', 'Fortaleza', 'Caucaia', 'Juazeiro do Norte', 'Teresina', 'Parnaíba', 'Rio Branco', 'Cruzeiro do Sul', 'Porto Velho', 'Ji-Paraná', 'Araguaína', 'Salvador', 'Feira de Santana', 'Vitória da Conquista', 'Recife', 'Jaboatão dos Guararapes', 'Maceió', 'Aracaju', 'Natal', 'Mossoró']
+    escolaridades = ['SEM ESCOLARIDADE', 'PRIMEIRO QUARTO INCOMPLETO', 'PRIMEIRO QUARTO COMPLETO', 'QUINTO NONO INCOMPLETO', 'QUINTO NONO COMPLETO', 'ENSINO MEDIO INCOMPLETO', 'ENSINO MEDIO COMPLETO', 'ENSINO SUPERIOR']
+    rendas = ['Menor que R$1.045,00 por mês', 'De R$1.045,00 a R$2.000,00', 'De R$2.001,00 a R$3.000,00', 'Acima de R$3.000,00']
+    situacoes = ['ATIVO', 'SUSPENSO', 'CANCELADO', 'REGISTRO_COM_PROTOCOLO', 'REGISTRO_INICIAL']
+
+    for i in range(50):
+        cpf = f"{np.random.randint(100, 999)}***{np.random.randint(10, 99)}"
+        nome_letras = ['A', 'E', 'I', 'O', 'U', 'M', 'N', 'P', 'R', 'S', 'T', 'C', 'F', 'G', 'H', 'J', 'K', 'L', 'D', 'B', 'V', 'X', 'Z', 'W', 'Y', 'Q']
+        nome = ''.join(np.random.choice(nome_letras, np.random.randint(5, 15)))
+        rgp = f"{np.random.choice(['APPA', 'AMPA', 'PAPA', 'MAPA', 'CEPA', 'SEPA', 'SPPA', 'RSPA'])}000000{np.random.randint(10000, 99999)}"
+
+        # Criar perfis com diferentes probabilidades de risco
+        rand = np.random.random()
+
+        # 30% de chance de ser médio risco
+        if rand < 0.3:
+            if rand < 0.15:  # Alta escolaridade + baixa renda
+                escolaridade = np.random.choice(['ENSINO MEDIO COMPLETO', 'ENSINO SUPERIOR'])
+                renda = 'Menor que R$1.045,00 por mês'
+                score = np.random.randint(20, 40)
+            else:  # Não filiado
+                escolaridade = np.random.choice(escolaridades[:5])
+                renda = np.random.choice(rendas[:2])
+                score = np.random.randint(10, 30)
+        else:  # Baixo risco
+            escolaridade = np.random.choice(escolaridades[:3])
+            renda = np.random.choice(rendas[1:])
+            score = np.random.randint(0, 10)
+
+        if score < 30:
+            categoria = 'BAIXO'
+        elif score < 60:
+            categoria = 'MEDIO'
+        else:
+            categoria = 'ALTO'
+
+        justificativas = []
+        if score >= 20:
+            if escolaridade in ['ENSINO MEDIO COMPLETO', 'ENSINO SUPERIOR'] and renda == 'Menor que R$1.045,00 por mês':
+                justificativas.append('Alta escolaridade com renda muito baixa para atividade')
+        if score >= 10 and np.random.random() < 0.5:
+            justificativas.append('Não é filiado a instituição de pesca')
+
+        dados.append({
+            'risco_score': score,
+            'risco_categoria': categoria,
+            'justificativas': justificativas,
+            'cpf': cpf,
+            'nome_pescador': nome,
+            'rgp': rgp,
+            'municipio': np.random.choice(cidades),
+            'uf': np.random.choice(estados),
+            'st_situacao_pescador': np.random.choice(situacoes, p=[0.7, 0.15, 0.05, 0.05, 0.05]),
+            'nivel_escolaridade': escolaridade,
+            'fonte_renda_faixa_renda': renda,
+            'renda_brasil_ou_bolsa_familia': np.random.random() < 0.4,
+            'st_possui_outra_fonte_renda': np.random.random() < 0.2,
+            'st_filiado_instituicao': score < 10 or np.random.random() < 0.7
+        })
+
+    # Garantir pelo menos 1 caso de alto risco
+    dados[0]['risco_score'] = 60
+    dados[0]['risco_categoria'] = 'ALTO'
+    dados[0]['justificativas'] = ['Recebe benefício social mas declara outra fonte de renda', 'Alta escolaridade com renda muito baixa para atividade', 'Endereço diferente de área de pesca']
+    dados[0]['nivel_escolaridade'] = 'ENSINO MEDIO COMPLETO'
+    dados[0]['fonte_renda_faixa_renda'] = 'Menor que R$1.045,00 por mês'
+    dados[0]['renda_brasil_ou_bolsa_familia'] = True
+    dados[0]['st_possui_outra_fonte_renda'] = True
+    dados[0]['st_filiado_instituicao'] = True
+
+    # Ordenar por score (maior para menor)
+    dados.sort(key=lambda x: x['risco_score'], reverse=True)
+
+    return pd.DataFrame(dados)
+
 def mascarar_texto(texto):
     """Função para mascarar texto sensível"""
     if pd.isna(texto) or texto == '':
@@ -74,26 +157,32 @@ def mascarar_texto(texto):
 # Carregar dados
 @st.cache_data
 def carregar_dados():
-    """Carregar dados já analisados (50 resultados)"""
+    """Carregar dados já analisados ou gerar dados simulados"""
+    # Tentar carregar dados reais primeiro
     try:
-        return pd.read_csv('data/processed/PESCADORES_AUDITORIA_50.csv')
+        if os.path.exists('data/processed/PESCADORES_AUDITORIA_50.csv'):
+            return pd.read_csv('data/processed/PESCADORES_AUDITORIA_50.csv')
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados analisados: {str(e)}")
-        st.error("💡 Execute: python3 analise_50_resultados.py")
-        return None
+        st.warning(f"⚠️ Dados reais não encontrados, gerando dados simulados...")
+
+    # Gerar dados simulados se não encontrar dados reais
+    st.info("🔄 Gerando dados simulados para demonstração (50 casos)")
+    df = gerar_dados_simulados()
+    st.success(f"✅ {len(df)} registros simulados gerados com sucesso!")
+    return df
 
 # Inicializar dados
 df = carregar_dados()
 
+# Aplicar mascaramento nos dados sensíveis (sempre existirá dados agora)
 if df is not None:
-    # Aplicar mascaramento nos dados sensíveis
     df['nome_mascarado'] = df['nome_pescador'].apply(mascarar_texto)
     df['cpf_mascarado'] = df['cpf'].apply(mascarar_texto)
 
 # Sidebar
 st.sidebar.title("🔍 Audit-IA")
 st.sidebar.markdown("**Auditoria Inteligente do RGP**")
-st.sidebar.markdown(f"📊 **50 Resultados Analisados**")
+st.sidebar.markdown(f"📊 **{len(df)} Resultados Analisados**")
 st.sidebar.markdown(f"🔒 **100% Dados Anonimizados**")
 
 # Navegação

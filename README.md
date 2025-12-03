@@ -44,38 +44,31 @@ mapa-pesqbrasil/
 └── app_checkpoints/              # Versões intermediárias
 ```
 
-## 🛠️ Instalação
+## 🚀 Como Executar
 
-### 1. Clonar o repositório
+### 🌐 **Via Streamlit Cloud (Recomendado)**
+
+Acesse diretamente: **https://share.streamlit.io/user/andreipacheco/mapa-pesqbrasil**
+
+### 💻 **Execução Local**
+
+1. **Clonar o repositório:**
 ```bash
-git clone <URL-do-repositorio>
+git clone https://github.com/andreipacheco/mapa-pesqbrasil.git
 cd mapa-pesqbrasil
 ```
 
-### 2. Criar ambiente virtual
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# ou
-.venv\Scripts\activate     # Windows
-```
-
-### 3. Instalar dependências
+2. **Instalar dependências:**
 ```bash
 pip install -r requirements.txt
 ```
 
-## 🚀 Como Usar
-
-### 🔍 Audit-IA (Aplicação Principal)
-
-1. **Iniciar a aplicação de auditoria:**
+3. **Executar aplicação principal:**
 ```bash
-streamlit run audit_app.py
+streamlit run audit_app_final.py
 ```
 
-2. **Acessar no navegador:**
-   - Abra http://localhost:8501
+4. **Acessar no navegador:** http://localhost:8501
 
 3. **Navegar pelas funcionalidades:**
    - **🏠 Dashboard**: Visão geral e métricas

@@ -144,16 +144,16 @@ def mascarar_texto(texto):
     if '*' in texto_str or 'XXXX' in texto_str:
         return texto_str
 
+    # Mascarar CPF: manter primeiros 3 e últimos 2 digitos (prioridade alta)
+    if len(texto_str) == 11 and texto_str.isdigit():
+        return f"{texto_str[:3]}***{texto_str[-2:]}"
+
     # Mascarar RGP: formato MAPA000XXXX0000, APPA000XXXX0000, etc.
     if any(texto_str.startswith(prefixo) for prefixo in ['MAPA', 'APPA', 'AMPA', 'PAPA', 'CEPA', 'SEPA', 'SPPA', 'RSPA']) and len(texto_str) >= 14:
         prefixo = texto_str[:8]  # MAPA000, APPA000, etc.
         meio = 'XXXX'
         finais = texto_str[-4:]  # últimos 4 dígitos
         return f"{prefixo}{meio}{finais}"
-
-    # Mascarar CPF: manter primeiros 3 e últimos 2 digitos
-    if len(texto_str) == 11 and texto_str.isdigit():
-        return f"{texto_str[:3]}***{texto_str[-2:]}"
 
     # Mascarar nome: manter primeira e última letra
     if len(texto_str) > 2:
